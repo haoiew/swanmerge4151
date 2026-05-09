@@ -1,0 +1,60 @@
+# Build products
+*.o
+*.obj
+*.mod
+*.f
+*.for
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# SWAN runtime artifacts
+INPUT
+PRINT
+PRINT-*
+Errfile
+Errfile-*
+ERRPTS
+norm_end
+machinefile
+*.prt
+*.erf
+*.erp
+*.log
+
+# Model outputs and private case data
+*.nc
+*.nc-*
+*.dat
+*.out
+*.res
+*.tbl
+*.spc
+*.grd
+*.bot
+*.dep
+
+# Local build configuration
+macros.inc.bak*
+check_swan_nc
+check_swan_nc.exe
+
+# Archives and temporary files
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.rar
+*.tmp
+*.bak
+*~
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

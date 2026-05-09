@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use SWANMERGE, cite this repository and the original SWAN model."
+title: "SWANMERGE 4.15.1"
+abstract: "A non-official SWAN 4.15.1 derivative focused on a merge-only executable for SWAN MPI NetCDF output fragments."
+type: software
+license: GPL-3.0-or-later
+repository-code: "https://github.com/haoiew/swanmerge4151"
+keywords:
+  - SWAN
+  - wave model
+  - NetCDF
+  - MPI
+  - coastal engineering
+preferred-citation:
+  type: article
+  title: "A third-generation wave model for coastal regions: 1. Model description and validation"
+  authors:
+    - family-names: Booij
+      given-names: N.
+    - family-names: Ris
+      given-names: R. C.
+    - family-names: Holthuijsen
+      given-names: L. H.
+  journal: "Journal of Geophysical Research: Oceans"
+  year: 1999
+  volume: 104
+  issue: C4
+  start: 7649
+  end: 7666
+  doi: 10.1029/98JC02622

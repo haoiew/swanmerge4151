@@ -1,0 +1,42 @@
+SWANMERGE 4.15.1
+
+This repository is a non-official derivative of SWAN 4.15.1 focused on
+building and running a merge-only executable for SWAN MPI output fragments.
+
+Upstream SWAN notice
+--------------------
+
+SWAN (Simulating WAves Nearshore) is a third-generation wave model developed
+by Delft University of Technology.
+
+Copyright (C) 1993-2024 Delft University of Technology
+
+The original SWAN source files in this repository retain their original
+copyright and GNU General Public License notices.
+
+Derivative status
+-----------------
+
+This repository is not an official TU Delft or SWAN team release. It is not
+endorsed, reviewed, or supported by TU Delft. For official SWAN releases,
+manuals, and references, use the SWAN project resources:
+
+https://swanmodel.sourceforge.io/
+
+Main SWANMERGE changes
+----------------------
+
+- Adds a `make merge` build target for `swanmerge.exe`.
+- Adds a `-merge` preprocessing switch in `switch.pl`.
+- Includes a merge-only `SWMERGE` execution path.
+- Includes the non-structured-grid merge ownership assignment used to avoid
+  merged NetCDF outputs with only missing values in affected cases.
+- Adds wrapper scripts and documentation for building, running, and validating
+  merge-only workflows.
+
+Citation request
+----------------
+
+When using this project, cite the original SWAN model and relevant SWAN papers.
+If the merge-specific changes from this repository are material to your work,
+also cite this repository.
