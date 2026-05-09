@@ -255,23 +255,40 @@ which swanmerge.exe
 
 Prepare a SWAN input file and the corresponding MPI output fragments from your own model run. This repository does not provide or assume any fixed test case name.
 
+### 8.1 Choose the run directory
+
+Run `swanmerge` from a case work directory, not from the source directory unless your case files are also there. The run directory must be writable because `swanmerge` creates temporary and log files there.
+
+Required before running:
+
+- `swanmerge` is available in `PATH`, or the wrapper from step 7 has been installed.
+- The SWAN input file, for example `run_case.swn`, is in the current run directory.
+- The MPI output fragments, for example `case.nc-001`, `case.nc-002`, and so on, exist at the paths expected by the SWAN input file.
+- If the input file uses relative paths, those paths must be valid from the run directory.
+- If your MPI setup requires a `machinefile`, place it in the run directory.
+
+Important: the `swanmerge` script uses the basename of the `-input` argument and then reads `<basename>.swn` from the current directory. Therefore, use `-input run_case.swn` after `cd "$WORKDIR"` instead of passing an absolute input-file path.
+
 Set the variables below for your data:
 
 ```bash
 export CASE_ID=<your_case_id>
-export INPUT_FILE=/path/to/run_${CASE_ID}.swn
+export INPUT_NAME=run_${CASE_ID}.swn
 export OUTDIR=/path/to/swan/output/fragments
 export WORKDIR=/path/to/swanmerge/test/workdir
 export BASE=<output_basename_without_fragment_suffix>
 export NPROC=<number_of_mpi_fragments>
 ```
 
-Check that the expected fragments exist:
+Check that the run directory and expected files are ready:
 
 ```bash
 cd "$WORKDIR"
+test -f "$INPUT_NAME"
 ls -1 "$OUTDIR/${BASE}.nc-"* | wc -l
 ```
+
+The count should match `NPROC`. If your `.swn` file writes fragments to a relative output path, adjust `OUTDIR` in the check above to the same relative location as seen from `WORKDIR`.
 
 Clean old run artifacts and execute:
 
@@ -281,7 +298,7 @@ rm -f swanmerge.exe INPUT norm_end PRINT PRINT-* Errfile Errfile-* \
       "merge_${CASE_ID}.log" "run_${CASE_ID}.mrg.prt"* "run_${CASE_ID}.mrg.erf"*
 rm -f "$OUTDIR/${BASE}.nc"
 
-swanmerge -input "$INPUT_FILE" -mpi "$NPROC" > "merge_${CASE_ID}.log" 2>&1
+swanmerge -input "$INPUT_NAME" -mpi "$NPROC" > "merge_${CASE_ID}.log" 2>&1
 echo "run_exit_code=$?"
 tail -n 80 "merge_${CASE_ID}.log"
 ls -lh "$OUTDIR/${BASE}.nc"
@@ -337,7 +354,8 @@ After the build and wrapper are installed, the common workflow is:
 
 ```bash
 cd /path/to/your/swan/workdir
-swanmerge -input /path/to/your/run_case.swn -mpi <number_of_mpi_fragments> > merge_case.log 2>&1
+test -f run_case.swn
+swanmerge -input run_case.swn -mpi <number_of_mpi_fragments> > merge_case.log 2>&1
 echo "exit_code=$?"
 tail -n 80 merge_case.log
 ```

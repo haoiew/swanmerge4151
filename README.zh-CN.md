@@ -67,12 +67,15 @@ make clobber
 make merge
 ```
 
-用你自己的 SWAN 案例运行：
+在案例运行目录中，用你自己的 SWAN 案例运行：
 
 ```bash
 cd /path/to/your/swan/workdir
-swanmerge -input /path/to/your/run_case.swn -mpi <number_of_mpi_fragments> > merge_case.log 2>&1
+test -f run_case.swn
+swanmerge -input run_case.swn -mpi <number_of_mpi_fragments> > merge_case.log 2>&1
 ```
+
+当前目录很重要。`swanmerge` 会把当前目录中的 `run_case.swn` 复制成 `INPUT`，并在当前目录写出 `PRINT*`、`Errfile*`、`norm_end` 和合并日志。SWAN MPI 输出分片必须位于 `run_case.swn` 中定义或引用的位置；如果输入文件中使用相对路径，这些路径会相对于当前运行目录解析。
 
 随后按构建指南中的方法，用 `ncdump` 和 `check_swan_nc.c` 验证合并后的 NetCDF 文件。
 

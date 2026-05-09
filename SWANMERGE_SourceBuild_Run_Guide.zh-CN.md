@@ -255,23 +255,40 @@ which swanmerge.exe
 
 准备你自己的 SWAN 输入文件和对应 MPI 输出分片。本仓库不提供、也不假设任何固定测试案例名。
 
+### 8.1 选择运行目录
+
+应在案例运行目录中执行 `swanmerge`，不要在源码目录中直接执行，除非你的案例文件也放在源码目录里。运行目录必须可写，因为 `swanmerge` 会在这里生成临时文件和日志。
+
+运行前需要准备好：
+
+- `swanmerge` 已在 `PATH` 中可见，或已经安装第 7 步的用户级包装器。
+- SWAN 输入文件，例如 `run_case.swn`，位于当前运行目录。
+- MPI 输出分片，例如 `case.nc-001`、`case.nc-002` 等，位于 SWAN 输入文件所定义或引用的位置。
+- 如果输入文件中使用相对路径，这些路径必须从当前运行目录出发是有效的。
+- 如果你的 MPI 设置需要 `machinefile`，请把 `machinefile` 放在当前运行目录。
+
+注意：`swanmerge` 脚本会取 `-input` 参数的 basename，然后在当前目录读取 `<basename>.swn`。因此，应先 `cd "$WORKDIR"`，再使用 `-input run_case.swn`，不要把绝对路径作为 `-input` 传入。
+
 根据你的数据设置变量：
 
 ```bash
 export CASE_ID=<your_case_id>
-export INPUT_FILE=/path/to/run_${CASE_ID}.swn
+export INPUT_NAME=run_${CASE_ID}.swn
 export OUTDIR=/path/to/swan/output/fragments
 export WORKDIR=/path/to/swanmerge/test/workdir
 export BASE=<output_basename_without_fragment_suffix>
 export NPROC=<number_of_mpi_fragments>
 ```
 
-检查预期分片是否存在：
+检查运行目录和预期文件是否准备好：
 
 ```bash
 cd "$WORKDIR"
+test -f "$INPUT_NAME"
 ls -1 "$OUTDIR/${BASE}.nc-"* | wc -l
 ```
+
+输出数量应与 `NPROC` 一致。如果 `.swn` 文件把分片写到相对路径，请把上面检查命令中的 `OUTDIR` 设置成从 `WORKDIR` 出发能访问到的相同相对位置。
 
 清理旧运行痕迹并执行：
 
@@ -281,7 +298,7 @@ rm -f swanmerge.exe INPUT norm_end PRINT PRINT-* Errfile Errfile-* \
       "merge_${CASE_ID}.log" "run_${CASE_ID}.mrg.prt"* "run_${CASE_ID}.mrg.erf"*
 rm -f "$OUTDIR/${BASE}.nc"
 
-swanmerge -input "$INPUT_FILE" -mpi "$NPROC" > "merge_${CASE_ID}.log" 2>&1
+swanmerge -input "$INPUT_NAME" -mpi "$NPROC" > "merge_${CASE_ID}.log" 2>&1
 echo "run_exit_code=$?"
 tail -n 80 "merge_${CASE_ID}.log"
 ls -lh "$OUTDIR/${BASE}.nc"
@@ -337,7 +354,8 @@ grep -niE "error|failed|cannot|inconsistency|iostat|abort" \
 
 ```bash
 cd /path/to/your/swan/workdir
-swanmerge -input /path/to/your/run_case.swn -mpi <number_of_mpi_fragments> > merge_case.log 2>&1
+test -f run_case.swn
+swanmerge -input run_case.swn -mpi <number_of_mpi_fragments> > merge_case.log 2>&1
 echo "exit_code=$?"
 tail -n 80 merge_case.log
 ```

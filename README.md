@@ -67,12 +67,15 @@ make clobber
 make merge
 ```
 
-Run with your own SWAN case:
+Run with your own SWAN case from the run directory:
 
 ```bash
 cd /path/to/your/swan/workdir
-swanmerge -input /path/to/your/run_case.swn -mpi <number_of_mpi_fragments> > merge_case.log 2>&1
+test -f run_case.swn
+swanmerge -input run_case.swn -mpi <number_of_mpi_fragments> > merge_case.log 2>&1
 ```
+
+The current directory matters. `swanmerge` copies `run_case.swn` to `INPUT` in the current directory and writes `PRINT*`, `Errfile*`, `norm_end`, and merge logs there. The SWAN MPI output fragments must exist at the paths expected by `run_case.swn`; if those paths are relative, they are resolved from this run directory.
 
 Then validate the merged NetCDF with `ncdump` and `check_swan_nc.c` as shown in the build guide.
 
