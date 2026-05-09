@@ -1,6 +1,6 @@
 !
 !     SWAN main program and miscellaneous routines
-!     Modified for SWANMERGE 4.15.1, 2026: adds a merge-only execution
+!     Modified for SWANMERGE 41.51, 2026: adds a merge-only execution
 !     path and merge-specific fixes for MPI NetCDF fragment merging.
 !
 !     Contents of this file:

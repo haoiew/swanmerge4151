@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
 #                      Makefile for building SWAN program and documentation
-#                      Modified for SWANMERGE 4.15.1, 2026
+#                      Modified for SWANMERGE 41.51, 2026
 # ------------------------------------------------------------------------------
 #
 # Before compilation, type "make config" first!

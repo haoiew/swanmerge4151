@@ -1,23 +1,23 @@
-# SWANMERGE source build and run guide
+# SWANMERGE 源码构建与运行指南
 
-[中文版本](SWANMERGE_SourceBuild_Run_Guide.zh-CN.md)
+[English version](SWANMERGE_SourceBuild_Run_Guide.md)
 
-This guide shows how to build the SWANMERGE executable from this source tree and how to run it on user-provided SWAN MPI output fragments.
+本指南说明如何从本源码树构建 SWANMERGE 可执行程序，并如何用用户自己提供的 SWAN MPI 输出分片运行合并。
 
-The repository does not include a public test case. Replace every placeholder path and case name below with paths and files from your own SWAN run.
+本仓库不包含公开测试案例。下面所有占位路径和案例名都需要替换为你自己的 SWAN 运行目录、输入文件和输出分片。
 
 ---
 
-## 1. Prepare the source directory
+## 1. 准备源码目录
 
-Choose a source directory on the Linux system:
+在 Linux 系统上选择源码目录：
 
 ```bash
 export SWAN_CODE=/path/to/swanmerge4151
 cd "$SWAN_CODE"
 ```
 
-Confirm that the key project files are present:
+确认关键项目文件存在：
 
 ```bash
 test -f swanmain.ftn
@@ -32,9 +32,9 @@ grep -n -- "-merge" switch.pl
 
 ---
 
-## 2. Check oneAPI and build tools
+## 2. 检查 oneAPI 和构建工具
 
-This build recipe uses Intel `mpiifx` for the MPI-enabled merge executable. If your oneAPI installation is in a custom location, set `ONEAPI_SETVARS` before sourcing the environment.
+本构建方案使用 Intel `mpiifx` 编译 MPI 版合并程序。如果你的 oneAPI 安装在自定义位置，请先设置 `ONEAPI_SETVARS`。
 
 ```bash
 export ONEAPI_SETVARS=${ONEAPI_SETVARS:-/opt/intel/oneapi/setvars.sh}
@@ -46,7 +46,7 @@ for x in perl make mpiifx mpirun ifx; do
 done
 ```
 
-If `ONEAPI_SETVARS` does not exist, point it at the real `setvars.sh` on your server:
+如果 `ONEAPI_SETVARS` 不存在，请改成当前服务器上的真实路径：
 
 ```bash
 export ONEAPI_SETVARS=/path/to/intel/oneapi/setvars.sh
@@ -54,9 +54,9 @@ export ONEAPI_SETVARS=/path/to/intel/oneapi/setvars.sh
 
 ---
 
-## 3. Detect METIS, NetCDF, and HDF5
+## 3. 探测 METIS、NetCDF 和 HDF5
 
-Different systems place libraries in different prefixes. Reuse ABI-compatible existing libraries first; install isolated dependencies only when headers or libraries are missing, or when `ldd` later shows mixed MPI ABIs.
+不同服务器的依赖库位置不一致。优先复用 ABI 兼容的现有库；只有缺少头文件/库文件，或者后续 `ldd` 显示 MPI ABI 混用时，才安装隔离依赖。
 
 ```bash
 find_prefix () {
@@ -83,7 +83,7 @@ echo "NETCDFROOT=$NETCDFROOT"
 echo "HDF5ROOT=$HDF5ROOT"
 ```
 
-Confirm that headers, modules, and libraries exist:
+确认头文件、Fortran module 和库文件存在：
 
 ```bash
 test -n "$METISROOT"  && test -f "$METISROOT/include/metis.h"
@@ -97,20 +97,20 @@ echo "METISLIBDIR=$METISLIBDIR"
 ls -lh "$METISLIBDIR"/libmetis.*
 ```
 
-If `METISLIBDIR` is found and `ls` shows `libmetis.*`, continue. Install METIS only when the library is truly missing.
+如果已经找到 `METISLIBDIR` 且能看到 `libmetis.*`，继续下一步。只有真正缺少库文件时再安装 METIS。
 
 ---
 
-## 4. Confirm the SWANMERGE source changes
+## 4. 确认 SWANMERGE 源码修复
 
-This source tree contains the SWANMERGE merge-only path and the non-structured-grid merge fix. Confirm that the uploaded source matches this project before building:
+本源码树包含 SWANMERGE 的仅合并路径和非结构网格合并修复。构建前先确认上传源码与本项目一致：
 
 ```bash
 cd "$SWAN_CODE"
 grep -n "SUBROUTINE SWMERGE\|USE SwanBraggScat\|USE SwanParallel\|BLKNDC = REAL(ipown)\|CORQ%OQI(1).EQ.0" swanmain.ftn
 ```
 
-Expected key lines include:
+预期关键行包括：
 
 ```fortran
       USE SwanBraggScat
@@ -121,9 +121,9 @@ Expected key lines include:
 
 ---
 
-## 5. Generate `macros.inc`
+## 5. 生成 `macros.inc`
 
-`macros.inc` defines compilers, flags, and library paths. Generate it from the detected prefixes:
+`macros.inc` 定义编译器、编译选项和库路径。用探测到的依赖前缀生成它：
 
 ```bash
 cd "$SWAN_CODE"
@@ -178,7 +178,7 @@ grep -E "^(F90_MPI|METISROOT|METISLIBDIR|NETCDFROOT|HDF5ROOT|LIBS_MPI|swch)" mac
 
 ---
 
-## 6. Build `swanmerge.exe`
+## 6. 编译 `swanmerge.exe`
 
 ```bash
 cd "$SWAN_CODE"
@@ -188,7 +188,7 @@ make merge
 echo "build_exit_code=$?"
 ```
 
-After compilation:
+编译后检查：
 
 ```bash
 test -x "$SWAN_CODE/swanmerge.exe"
@@ -196,13 +196,13 @@ grep -n "USE SwanBraggScat\|USE SwanParallel\|BLKNDC = REAL(ipown)" swanmain.f
 ldd "$SWAN_CODE/swanmerge.exe" | egrep -i "libmpi.so|libmpifort|libhdf5|libnetcdf|libmetis|libGKlib"
 ```
 
-If `ldd` shows two incompatible MPI families, install ABI-compatible isolated dependencies and rebuild.
+如果 `ldd` 显示两个不兼容的 MPI 家族，请安装 ABI 一致的隔离依赖后重新编译。
 
 ---
 
-## 7. Install a user-level wrapper
+## 7. 安装用户级包装器
 
-The wrapper keeps paths out of shell startup files except for adding `$HOME/bin` to `PATH`.
+包装器只把 `$HOME/bin` 加入 `PATH`，不会把大量库路径长期写入 shell 启动文件。
 
 ```bash
 cd "$SWAN_CODE"
@@ -240,7 +240,7 @@ type -a swanmerge
 which swanmerge.exe
 ```
 
-Open a new terminal and confirm:
+打开新终端后再次确认：
 
 ```bash
 source ~/.bashrc
@@ -251,11 +251,11 @@ which swanmerge.exe
 
 ---
 
-## 8. Run a merge test with your own case
+## 8. 用自己的案例执行合并测试
 
-Prepare a SWAN input file and the corresponding MPI output fragments from your own model run. This repository does not provide or assume any fixed test case name.
+准备你自己的 SWAN 输入文件和对应 MPI 输出分片。本仓库不提供、也不假设任何固定测试案例名。
 
-Set the variables below for your data:
+根据你的数据设置变量：
 
 ```bash
 export CASE_ID=<your_case_id>
@@ -266,14 +266,14 @@ export BASE=<output_basename_without_fragment_suffix>
 export NPROC=<number_of_mpi_fragments>
 ```
 
-Check that the expected fragments exist:
+检查预期分片是否存在：
 
 ```bash
 cd "$WORKDIR"
 ls -1 "$OUTDIR/${BASE}.nc-"* | wc -l
 ```
 
-Clean old run artifacts and execute:
+清理旧运行痕迹并执行：
 
 ```bash
 cd "$WORKDIR"
@@ -287,13 +287,13 @@ tail -n 80 "merge_${CASE_ID}.log"
 ls -lh "$OUTDIR/${BASE}.nc"
 ```
 
-Expected signs of success are `run_exit_code=0`, an output NetCDF file, and `Normal end of run 1` in the log.
+成功迹象包括：`run_exit_code=0`、目标 NetCDF 文件存在、日志中出现 `Normal end of run 1`。
 
 ---
 
-## 9. Validate NetCDF values
+## 9. 验证 NetCDF 数值
 
-Creating a NetCDF file is not enough; verify that key variables contain valid values.
+生成 NetCDF 文件还不够，需要确认关键变量包含有效值。
 
 ```bash
 export NCFILE="$OUTDIR/${BASE}.nc"
@@ -306,7 +306,7 @@ else
 fi
 ```
 
-Build and run the lightweight C checker:
+编译并运行轻量级 C 检查工具：
 
 ```bash
 cd "$SWAN_CODE"
@@ -320,9 +320,9 @@ LD_LIBRARY_PATH="$NETCDFROOT/lib:$HDF5ROOT/lib:${LD_LIBRARY_PATH:-}" \
   ./check_swan_nc "$NCFILE"
 ```
 
-At least one important wave variable, such as `hs`, `tps`, or `tm01`, should report `valid > 0`.
+至少一个重要波浪变量，例如 `hs`、`tps` 或 `tm01`，应显示 `valid > 0`。
 
-Also inspect the merge log:
+同时检查合并日志：
 
 ```bash
 grep -niE "error|failed|cannot|inconsistency|iostat|abort" \
@@ -331,9 +331,9 @@ grep -niE "error|failed|cannot|inconsistency|iostat|abort" \
 
 ---
 
-## 10. Common command pattern
+## 10. 常用命令模式
 
-After the build and wrapper are installed, the common workflow is:
+完成构建和包装器安装后，常用流程为：
 
 ```bash
 cd /path/to/your/swan/workdir
@@ -342,7 +342,7 @@ echo "exit_code=$?"
 tail -n 80 merge_case.log
 ```
 
-If you see `Too many levels of symbolic links`, remove a stale local symlink and retry:
+如果遇到 `Too many levels of symbolic links`，删除工作目录中的旧链接后重试：
 
 ```bash
 rm -f ./swanmerge.exe

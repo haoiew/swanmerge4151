@@ -1,20 +1,20 @@
-# SWANMERGE offline dependency build guide
+# SWANMERGE 离线依赖构建指南
 
-[中文版本](SWANMERGE_Offline_Repro_Guide.zh-CN.md)
+[English version](SWANMERGE_Offline_Repro_Guide.md)
 
-Use this guide only when one of these conditions applies:
+只有在以下情况之一出现时，才需要使用本指南：
 
-1. the target Linux server lacks METIS, HDF5, NetCDF-C, or NetCDF-Fortran;
-2. `ldd swanmerge.exe` shows libraries from incompatible MPI families;
-3. the server has no internet access, so source archives must be downloaded elsewhere and copied to the server.
+1. 目标 Linux 服务器缺少 METIS、HDF5、NetCDF-C 或 NetCDF-Fortran；
+2. `ldd swanmerge.exe` 显示链接到了不兼容的 MPI 家族；
+3. 服务器没有外网，需要在其他机器下载源码包后再复制到服务器。
 
-If the main build guide already found compatible dependencies and `ldd` does not show mixed MPI ABIs, skip this guide.
+如果主构建指南已经找到兼容依赖，并且 `ldd` 没有显示 MPI ABI 混用，可以跳过本指南。
 
 ---
 
-## 1. Check what is missing
+## 1. 检查缺少什么
 
-Do not reinstall dependencies by default. Reuse existing ABI-compatible libraries when possible.
+不要默认重装依赖。能复用当前服务器上 ABI 兼容的库，就优先复用。
 
 ```bash
 find_prefix () {
@@ -45,31 +45,31 @@ test -n "$NETCDFROOT" && test -f "$NETCDFROOT/include/netcdf.h" && test -f "$NET
 test -n "$HDF5ROOT"   && test -f "$HDF5ROOT/include/hdf5.h" || echo "MISS: HDF5"
 ```
 
-If `swanmerge.exe` has already been built, check the linked libraries:
+如果已经构建过 `swanmerge.exe`，检查动态库链接：
 
 ```bash
 ldd "${SWAN_CODE:-/path/to/swanmerge4151}/swanmerge.exe" | egrep -i "libmpi.so|libmpifort|libhdf5|libnetcdf" || true
 ```
 
-If two incompatible MPI families appear, rebuild HDF5/NetCDF with the same compiler/MPI stack used for SWANMERGE.
+如果出现两个不兼容的 MPI 家族，请用与 SWANMERGE 相同的编译器/MPI 栈重建 HDF5/NetCDF。
 
 ---
 
-## 2. Prepare source archives
+## 2. 准备源码包
 
-When the server has no internet access, download the needed archives on another machine and copy them to the server.
+当服务器没有外网时，在另一台机器下载所需源码包，然后复制到服务器。
 
-Typical archive names are:
+常见源码包名称如下：
 
 ```text
-METIS missing: metis-5.1.0.tar.gz
-HDF5 missing or MPI ABI conflict: hdf5-1.14.5.tar.gz
-NetCDF-C missing or MPI ABI conflict: netcdf-c-4.9.2.tar.gz
-NetCDF-Fortran missing or MPI ABI conflict: netcdf-fortran-4.6.1.tar.gz
-zlib headers missing: zlib-1.3.1.tar.gz
+METIS 缺失：metis-5.1.0.tar.gz
+HDF5 缺失或 MPI ABI 冲突：hdf5-1.14.5.tar.gz
+NetCDF-C 缺失或 MPI ABI 冲突：netcdf-c-4.9.2.tar.gz
+NetCDF-Fortran 缺失或 MPI ABI 冲突：netcdf-fortran-4.6.1.tar.gz
+zlib 头文件缺失：zlib-1.3.1.tar.gz
 ```
 
-Set a package directory and confirm the files:
+设置包目录并确认文件：
 
 ```bash
 export PKGROOT=/path/to/offline_pkgs
@@ -77,13 +77,13 @@ mkdir -p "$PKGROOT"
 ls -lh "$PKGROOT"/*.tar.gz
 ```
 
-Avoid relying on automatically generated archive names such as `v4.9.2.tar.gz`; rename files to the explicit names expected by the commands below.
+不要依赖 `v4.9.2.tar.gz` 这类自动生成的压缩包名称；建议重命名为下面命令中使用的明确文件名。
 
 ---
 
-## 3. Set an isolated install prefix
+## 3. 设置隔离安装前缀
 
-Install into a user-controlled prefix instead of overwriting system libraries:
+安装到用户可控目录，不覆盖系统库：
 
 ```bash
 export ONEAPI_SETVARS=${ONEAPI_SETVARS:-/opt/intel/oneapi/setvars.sh}
@@ -103,15 +103,15 @@ cd "$SRCROOT"
 
 ---
 
-## 4. Install METIS only when needed
+## 4. 只在需要时安装 METIS
 
-First confirm that no usable METIS library exists:
+先确认没有可用的 METIS 库：
 
 ```bash
 find $SWANMERGE_SEARCH_ROOTS -type f \( -name 'libmetis.a' -o -name 'libmetis.so*' \) -printf '%h/%f\n' 2>/dev/null | head
 ```
 
-If the command already finds a compatible library, return to the main build guide and set `METISLIBDIR`. Install METIS only when the library is missing:
+如果命令已经找到兼容库，回到主构建指南设置 `METISLIBDIR` 即可。只有确实缺少库文件时才安装 METIS：
 
 ```bash
 command -v cmake || { echo "MISS: cmake; install cmake first"; exit 1; }
@@ -127,13 +127,13 @@ test -f "$METISROOT/include/metis.h"
 ls "$METISROOT"/lib/libmetis.*
 ```
 
-Some METIS builds provide `libGKlib`; others do not. The main build guide detects this automatically.
+有些 METIS 构建会提供 `libGKlib`，有些不会。主构建指南会自动判断，不需要手工固定。
 
 ---
 
-## 5. Install HDF5 only when needed
+## 5. 只在需要时安装 HDF5
 
-The commands below build serial HDF5 with Intel compilers. This does not make SWANMERGE serial; it only avoids linking NetCDF/HDF5 against an incompatible MPI ABI.
+下面命令使用 Intel 编译器构建串行 HDF5。这不会让 SWANMERGE 变成串行程序；它只是避免 NetCDF/HDF5 链接到不兼容的 MPI ABI。
 
 ```bash
 cd "$SRCROOT"
@@ -151,7 +151,7 @@ test -f "$HDF5ROOT/include/hdf5.h"
 ldd "$HDF5ROOT/lib/libhdf5.so" | grep libmpi || echo "OK: HDF5 is not linked to MPI"
 ```
 
-If zlib is missing, install it into the same isolated prefix:
+如果缺少 zlib，先安装到同一隔离前缀：
 
 ```bash
 cd "$SRCROOT"
@@ -162,7 +162,7 @@ make -j"$JOBS"
 make install
 ```
 
-Then rerun the HDF5 configuration with:
+然后重新配置 HDF5，并添加：
 
 ```bash
 --with-zlib="$PREFIX/zlib"
@@ -170,9 +170,9 @@ Then rerun the HDF5 configuration with:
 
 ---
 
-## 6. Install NetCDF-C only when needed
+## 6. 只在需要时安装 NetCDF-C
 
-Disable DAP and parallel4 to reduce offline dependencies and avoid MPI ABI mixing:
+关闭 DAP 和 parallel4，减少离线依赖并避免 MPI ABI 混用：
 
 ```bash
 cd "$SRCROOT"
@@ -196,9 +196,9 @@ ldd "$NETCDFROOT/lib/libnetcdf.so" | grep libmpi || echo "OK: NetCDF-C is not li
 
 ---
 
-## 7. Install NetCDF-Fortran only when needed
+## 7. 只在需要时安装 NetCDF-Fortran
 
-SWANMERGE needs `netcdf.mod` and `libnetcdff.so`:
+SWANMERGE 需要 `netcdf.mod` 和 `libnetcdff.so`：
 
 ```bash
 cd "$SRCROOT"
@@ -217,11 +217,11 @@ test -f "$NETCDFROOT/include/netcdf.mod"
 ldd "$NETCDFROOT/lib/libnetcdff.so" | egrep -i "libmpi|libnetcdf" || true
 ```
 
-`libnetcdff.so` should link to `libnetcdf.so`, but it should not introduce an incompatible MPI library.
+`libnetcdff.so` 应能链接到 `libnetcdf.so`，但不应引入不兼容的 MPI 库。
 
 ---
 
-## 8. Rebuild SWANMERGE with the isolated dependencies
+## 8. 使用隔离依赖重新构建 SWANMERGE
 
 ```bash
 export SWAN_CODE=/path/to/swanmerge4151
@@ -236,22 +236,22 @@ export NETCDFROOT=${NETCDFROOT:-$HOME/opt/swanmerge_intel/netcdf}
 source "$ONEAPI_SETVARS" --force
 ```
 
-Then return to the main build guide and continue from the `macros.inc` generation step.
+然后回到主构建指南，从生成 `macros.inc` 步骤继续。
 
 ---
 
-## 9. Final ABI check
+## 9. 最终 ABI 检查
 
 ```bash
 ldd "$SWAN_CODE/swanmerge.exe" | egrep -i "libmpi.so|libmpifort|libhdf5|libnetcdf"
 ```
 
-Acceptable results should show a single MPI family, for example Intel oneAPI MPI plus ABI-compatible NetCDF/HDF5 libraries.
+可接受结果应只包含一个 MPI 家族，例如 Intel oneAPI MPI 加上 ABI 兼容的 NetCDF/HDF5 库。
 
-If both Intel MPI and OpenMPI libraries appear, inspect `LD_LIBRARY_PATH`, `macros.inc`, and `ldd` output for `libnetcdf.so` and `libhdf5.so`, then rebuild against a consistent stack.
+如果同时出现 Intel MPI 和 OpenMPI 库，请检查 `LD_LIBRARY_PATH`、`macros.inc`，以及 `libnetcdf.so`、`libhdf5.so` 的 `ldd` 输出，然后用一致的依赖栈重新构建。
 
 ---
 
-## 10. Key point
+## 10. 关键点
 
-`BLKNDC = REAL(ipown)` addresses the non-structured-grid merge issue where merged NetCDF values can become all missing values. Isolated HDF5/NetCDF builds address missing dependency or MPI ABI issues. They solve different problems and should not be treated as substitutes for each other.
+`BLKNDC = REAL(ipown)` 解决的是部分非结构网格合并场景中 NetCDF 合并结果全缺失值的问题。隔离 HDF5/NetCDF 构建解决的是缺依赖或 MPI ABI 混用问题。二者解决的问题不同，不能互相替代。

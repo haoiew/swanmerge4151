@@ -1,7 +1,8 @@
-SWANMERGE 4.15.1
+SWANMERGE 41.51
 
-This repository is a non-official derivative of SWAN 4.15.1 focused on
-building and running a merge-only executable for SWAN MPI output fragments.
+This repository is a SWAN 41.51 merge-only extension branch focused on
+building and running a standalone merge executable for SWAN MPI output
+fragments.
 
 Upstream SWAN notice
 --------------------
@@ -14,12 +15,12 @@ Copyright (C) 1993-2024 Delft University of Technology
 The original SWAN source files in this repository retain their original
 copyright and GNU General Public License notices.
 
-Derivative status
------------------
+Branch status
+-------------
 
-This repository is not an official TU Delft or SWAN team release. It is not
-endorsed, reviewed, or supported by TU Delft. For official SWAN releases,
-manuals, and references, use the SWAN project resources:
+This repository preserves the upstream SWAN license notices and identifies the
+merge-related changes made in this branch. For official SWAN releases, manuals,
+and references, use the SWAN project resources:
 
 https://swanmodel.sourceforge.io/
 

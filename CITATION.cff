@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use SWANMERGE, cite this repository and the original SWAN model."
-title: "SWANMERGE 4.15.1"
-abstract: "A non-official SWAN 4.15.1 derivative focused on a merge-only executable for SWAN MPI NetCDF output fragments."
+title: "SWANMERGE 41.51"
+abstract: "A SWAN 41.51 merge-only extension branch focused on a standalone merge executable for SWAN MPI NetCDF output fragments."
 type: software
 license: GPL-3.0-or-later
 repository-code: "https://github.com/haoiew/swanmerge4151"

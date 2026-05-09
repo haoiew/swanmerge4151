@@ -1,4 +1,4 @@
-# Modified for SWANMERGE 4.15.1, 2026: adds the -merge preprocessing switch.
+# Modified for SWANMERGE 41.51, 2026: adds the -merge preprocessing switch.
 # --- parsing arguments
 $esmf = "FALSE";
 $tim = "FALSE";

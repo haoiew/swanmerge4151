@@ -1,14 +1,16 @@
-# SWANMERGE 4.15.1
+# SWANMERGE 41.51
 
-SWANMERGE is a small, non-official derivative of SWAN 4.15.1 focused on building and running a merge-only executable, `swanmerge.exe`, for SWAN MPI output fragments.
+[中文说明](README.zh-CN.md)
 
-This project is not a replacement for the official SWAN model. It keeps the SWAN 4.15.1 source layout and adds the minimum build/runtime support needed for the merge workflow.
+SWANMERGE is a SWAN 41.51 merge-only extension branch. It focuses on building and running `swanmerge.exe`, a standalone merge executable for SWAN MPI NetCDF output fragments.
+
+This project is intended for post-processing SWAN MPI outputs. It does not use the full SWAN wave computation workflow; it keeps the SWAN 41.51 source layout and adds the build/runtime support needed for the merge path.
 
 ## Intended use
 
 Use this project when all of the following are true:
 
-- You already run SWAN in MPI mode and have per-rank output fragments such as `case.nc-001`, `case.nc-002`, and so on.
+- You already ran SWAN in MPI mode and have per-rank output fragments such as `case.nc-001`, `case.nc-002`, and so on.
 - You need a standalone command to merge those fragments into one NetCDF file without rerunning the full wave simulation.
 - Your case uses SWAN output and grid settings compatible with the original SWAN merge path.
 - You can build SWAN from source on a Linux system with Intel oneAPI, MPI, METIS, HDF5, and NetCDF.
@@ -21,23 +23,23 @@ This repository does not provide a complete public SWAN benchmark case. It does 
 
 This project is also not intended to:
 
-- replace the official SWAN distribution;
+- replace a full SWAN model build for wave simulation;
 - change SWAN physics or calibration defaults;
 - provide general SWAN model setup guidance;
 - provide prebuilt binaries for every compiler/MPI stack;
 - guarantee that a merged file is scientifically valid without checking the original model setup and outputs.
 
-## What changed from SWAN 4.15.1
+## What changed from SWAN 41.51
 
-The project keeps the original SWAN source files and license headers. The open-source package adds or changes the following project-level pieces:
+The project keeps the original SWAN source files and license headers. This branch adds or changes the following merge-related pieces:
 
 - `Makefile`: adds `make merge` and `swanmerge.exe` targets.
 - `switch.pl`: adds the `-merge` switch to activate merge-only source sections.
 - `swanmain.ftn`: includes the `SWMERGE` path and merge-specific fixes, including the non-structured-grid ownership field assignment used by the merge workflow.
 - `swanmerge`, `swanmerge_run.sh`, `swanmerge_env.sh`: runtime wrappers for loading dependencies and running merge jobs.
 - `check_swan_nc.c`: a lightweight NetCDF value checker for merged output.
-- `SWANMERGE_SourceBuild_Run_Guide.md`: source build, install, run, and validation workflow.
-- `SWANMERGE_Offline_Repro_Guide.md`: offline dependency build workflow for servers without suitable libraries.
+- `SWANMERGE_SourceBuild_Run_Guide.md`: source build, install, run, and validation workflow. See [Chinese version](SWANMERGE_SourceBuild_Run_Guide.zh-CN.md).
+- `SWANMERGE_Offline_Repro_Guide.md`: offline dependency build workflow for servers without suitable libraries. See [Chinese version](SWANMERGE_Offline_Repro_Guide.zh-CN.md).
 
 ## Quick start
 
@@ -102,7 +104,7 @@ The included `check_swan_nc.c` helper reads selected NetCDF variables and report
 
 SWANMERGE is distributed under the GNU General Public License, version 3 or later. See [LICENSE](LICENSE).
 
-This is a non-official derivative of SWAN. The original SWAN model is developed by Delft University of Technology and is distributed under the GNU GPL. This repository preserves the original SWAN copyright and license headers.
+The original SWAN model is developed by Delft University of Technology and is distributed under the GNU GPL. This repository preserves the original SWAN copyright and license headers.
 
 Users should cite the original SWAN model and papers when using this software in academic or operational work. See [CITATION.cff](CITATION.cff) and [NOTICE](NOTICE).
 
